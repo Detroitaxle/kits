@@ -1,1 +1,102 @@
 
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kits - Piece Price Allocator</title>
+
+  <!-- Favicons (place these files at the repository root) -->
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <meta name="description" content="Kit price allocator — allocate discounted kit price proportionally to parts and calculate refund totals." />
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Kits — Piece Price Allocator</h1>
+    </header>
+
+    <div class="grid">
+      <div class="card inputs">
+        <div class="row-ctrls">
+          <div style="flex:1">
+            <label class="small">Kit total price (final discounted price)</label>
+            <div class="kit-price">
+              <span style="color:var(--muted);font-weight:700">$</span>
+              <input id="kitPrice" type="number" min="0" step="0.01" value="100.00" />
+            </div>
+          </div>
+
+          <div style="width:180px;text-align:right">
+            <label class="small">Rows</label>
+            <div style="font-weight:700;color:var(--muted)" id="rowCount">10</div>
+          </div>
+        </div>
+
+        <div class="parts-table card" style="padding:8px;background:linear-gradient(180deg,#121212,#0f0f10)">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:36%">Part Number</th>
+                <th style="width:18%">Qty</th>
+                <th style="width:18%">List Price</th>
+                <th style="width:12%">Refund?</th>
+                <th style="width:16%">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="partsBody">
+              <!-- rows injected by JS -->
+            </tbody>
+          </table>
+
+          <div class="add-row" style="padding:10px">
+            <button id="addRow" class="btn" type="button">+ Add Part</button>
+            <button id="resetRows" class="btn ghost" style="margin-left:8px" type="button">Reset to 10</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="card results">
+        <div class="stat">
+          <div>
+            <div class="muted">Total list price (before discount)</div>
+            <div id="totalList" style="font-weight:800">$0.00</div>
+          </div>
+          <div>
+            <div class="muted">Kit price</div>
+            <div class="value" id="kitPriceDisplay">$0.00</div>
+          </div>
+        </div>
+
+        <div class="stat">
+          <div>
+            <div class="muted">Total allocated (should equal kit)</div>
+            <div id="allocatedTotal" style="font-weight:800">$0.00</div>
+          </div>
+          <div>
+            <div class="muted">Refund total (checked parts)</div>
+            <div class="value" id="refundTotal">$0.00</div>
+          </div>
+        </div>
+
+        <div class="list-results" id="listResults">
+          <!-- per-part result lines go here -->
+        </div>
+
+        <div class="footer-note" id="balanceNote">Amounts are balanced</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
