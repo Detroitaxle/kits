@@ -1,4 +1,3 @@
-
 :root{
   --bg:#0f0f10;
   --card:#1c1c1d;
@@ -38,6 +37,9 @@ label.small{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
 .kit-price{display:flex;gap:12px;align-items:center}
 .kit-price input[type=number]{width:200px;padding:10px 12px;border-radius:8px;background:var(--glass);border:1px solid rgba(255,255,255,0.03);color:var(--text);font-weight:600}
 
+.refund-total-display{text-align:center;padding:0 20px;}
+.refund-total-display .value{font-size:24px;font-weight:800;color:var(--accent);}
+
 .parts-table{margin-top:10px;border-radius:10px;overflow:hidden}
 table{width:100%;border-collapse:collapse;font-size:13px}
 thead th{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:10px 12px;text-align:left;color:var(--muted);font-weight:600}
@@ -72,7 +74,14 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
+/* Placeholder styling */
+::placeholder {
+  color: rgba(255,255,255,0.3);
+}
+
 @media (max-width:980px){
   .grid{grid-template-columns:1fr;}
   .results{order:-1}
+  .inputs .row-ctrls{flex-direction:column;align-items:stretch;}
+  .refund-total-display{order:-1;padding:10px 0;}
 }
