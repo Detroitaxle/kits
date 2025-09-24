@@ -7,7 +7,7 @@ const fmt = (v)=>{
 // State
 const state = { rows: [] };
 
-// Create initial 10 rows
+// Create initial 8 rows
 function makeRow(id, pn = '', qty = 1, price = 0.00, refunded = false){
   return { id, pn, qty: Number(qty)||1, price: Number(price)||0, refunded: Boolean(refunded) };
 }
@@ -17,7 +17,8 @@ const kitPriceEl = document.getElementById('kitPrice');
 const rowCountEl = document.getElementById('rowCount');
 
 function init(){
-  for(let i=0;i<10;i++) state.rows.push(makeRow(cryptoId(), '', 1, 0.00, false));
+  // Start with 8 empty rows instead of 10
+  for(let i=0;i<8;i++) state.rows.push(makeRow(cryptoId(), '', 1, 0.00, false));
   renderRows();
   recalc();
   attachActions();
@@ -32,10 +33,15 @@ function renderRows(){
   state.rows.forEach((r, idx)=>{
     const tr = document.createElement('tr');
     tr.dataset.id = r.id;
+    
+    // Use placeholder for price instead of 0.00
+    const priceValue = r.price === 0 ? '' : r.price.toFixed(2);
+    const pricePlaceholder = '0.00';
+    
     tr.innerHTML = `
       <td><input class="input-text" data-field="pn" value="${escapeHtml(r.pn)}" placeholder="Part #" /></td>
       <td><input class="input-num" type="number" min="1" data-field="qty" value="${r.qty}" /></td>
-      <td><input class="input-num" type="number" min="0" step="0.01" data-field="price" value="${r.price.toFixed(2)}" /></td>
+      <td><input class="input-num" type="number" min="0" step="0.01" data-field="price" value="${priceValue}" placeholder="${pricePlaceholder}" /></td>
       <td style="text-align:center"><input type="checkbox" data-field="refunded" ${r.refunded? 'checked': ''} /></td>
       <td style="text-align:right"><button class="btn ghost btn-del">Remove</button></td>
     `;
@@ -60,7 +66,11 @@ function onRowInput(e){
   if(!row) return;
   if(field==='pn') row.pn = e.target.value;
   if(field==='qty') row.qty = Math.max(1, Number(e.target.value)||1);
-  if(field==='price') row.price = Math.max(0, Number(e.target.value)||0);
+  if(field==='price') {
+    const value = e.target.value;
+    // If input is empty, set to 0 but keep placeholder visible
+    row.price = value === '' ? 0 : Math.max(0, Number(value)||0);
+  }
   if(field==='refunded') row.refunded = e.target.checked;
   recalc();
 }
@@ -84,7 +94,8 @@ function attachActions(){
 
   document.getElementById('resetRows').addEventListener('click', ()=>{
     state.rows = [];
-    for(let i=0;i<10;i++) state.rows.push(makeRow(cryptoId(),'',1,0.00,false));
+    // Reset to 8 rows instead of 10
+    for(let i=0;i<8;i++) state.rows.push(makeRow(cryptoId(),'',1,0.00,false));
     renderRows(); recalc();
   });
 
