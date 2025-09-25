@@ -21,8 +21,8 @@
             --bg-tertiary: #2d2d2d;
             --text-primary: #e0e0e0;
             --text-secondary: #a0a0a0;
-            --accent-primary: #7c4dff;
-            --accent-secondary: #03dac6;
+            --accent-primary: #ff6b35;
+            --accent-secondary: #ff8c42;
             --border-color: #333333;
             --success: #00c853;
             --warning: #ffab00;
@@ -43,26 +43,6 @@
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             overflow: hidden;
-        }
-
-        header {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            color: var(--accent-secondary);
-        }
-
-        .subtitle {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            color: var(--text-secondary);
         }
 
         .content {
@@ -122,7 +102,7 @@
         input[type="number"]:focus, input[type="text"]:focus {
             outline: none;
             border-color: var(--accent-primary);
-            box-shadow: 0 0 0 2px rgba(124, 77, 255, 0.2);
+            box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2);
         }
 
         /* Remove arrows from number inputs */
@@ -137,12 +117,12 @@
         }
 
         .kit-parts {
-            max-height: 400px;
-            overflow-y: auto;
+            min-height: 200px;
             border: 1px solid var(--border-color);
             border-radius: 6px;
             padding: 15px;
             background: var(--bg-tertiary);
+            margin-bottom: 20px;
         }
 
         .part-row {
@@ -185,7 +165,7 @@
         }
 
         .btn-primary:hover {
-            background: #6a3dff;
+            background: #e55a2e;
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
@@ -286,7 +266,7 @@
         }
 
         .highlight {
-            background-color: rgba(124, 77, 255, 0.2);
+            background-color: rgba(255, 107, 53, 0.2);
             padding: 2px 5px;
             border-radius: 3px;
             color: var(--accent-primary);
@@ -309,17 +289,12 @@
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #6a3dff;
+            background: #e55a2e;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Kit Price Calculator</h1>
-            <div class="subtitle">Calculate individual piece prices within discounted kits</div>
-        </header>
-
         <div class="content">
             <!-- Left Side: Input Section -->
             <div class="input-section">
@@ -401,7 +376,7 @@
             const row = document.createElement('div');
             row.className = 'part-row';
             row.innerHTML = `
-                <input type="checkbox" class="part-checkbox" checked>
+                <input type="checkbox" class="part-checkbox">
                 <input type="text" class="part-number" placeholder="Part Number">
                 <input type="number" class="part-price" placeholder="0.00" step="0.01" min="0" value="0">
                 <input type="number" class="part-quantity" placeholder="Qty" min="1" value="1">
