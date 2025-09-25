@@ -1,568 +1,257 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kit Price Calculator</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kit Refund Calculator — Detroit Axle</title>
+  <link rel="icon" href="favicon.ico" />
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+  <style>
+    /* Basic dark theme matching the screenshot */
+    :root{
+      --bg:#0f0f10; --panel:#1d1d1e; --muted:#2a2a2b; --card:#222; --accent:#ff6f1a; --accent-2:#ff8b3a; --green:#06c36a; --text:#e9e7e6;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#0b0b0c,#0f0f10);font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:var(--text);}
+    .wrap{max-width:1200px;margin:24px auto;padding:18px;display:grid;grid-template-columns:1fr 420px;gap:20px}
 
-        :root {
-            --bg-primary: #121212;
-            --bg-secondary: #1e1e1e;
-            --bg-tertiary: #2d2d2d;
-            --text-primary: #e0e0e0;
-            --text-secondary: #a0a0a0;
-            --accent-primary: #ff6b35;
-            --accent-secondary: #ff8c42;
-            --border-color: #333333;
-            --success: #00c853;
-            --warning: #ffab00;
-            --error: #cf6679;
-        }
+    /* Left column */
+    .panel{background:var(--panel);border-radius:8px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,.6);}
+    h2{margin:0 0 12px 0;color:var(--accent)}
+    label.small{display:block;font-size:12px;color:#ddd;margin-bottom:6px}
+    .input, input[type="text"], input[type="number"]{background:#232323;border:1px solid #252525;padding:10px 12px;border-radius:6px;color:var(--text);width:100%;box-sizing:border-box}
+    .kit-top{margin-bottom:12px}
 
-        body {
-            background: linear-gradient(135deg, #0f0f0f 0%, #2a2a2a 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: var(--text-primary);
-        }
+    .parts-list{background:linear-gradient(180deg,#1a1a1b,#181818);padding:12px;border-radius:8px;border:1px solid #2b2b2b}
+    .part-row{display:grid;grid-template-columns:28px 64px 1fr 120px;gap:10px;align-items:center;padding:10px;border-radius:6px;border-bottom:1px solid rgba(255,255,255,.02)}
+    .part-row:last-child{border-bottom:0}
+    .checkbox-wrap{display:flex;justify-content:center}
+    .qty{max-width:56px}
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: var(--bg-secondary);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            overflow: hidden;
-        }
+    /* Remove number input arrows */
+    input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance:textfield; }
 
-        .content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            padding: 30px;
-        }
+    .controls{display:flex;gap:10px;margin-top:12px}
+    .btn{background:var(--accent);color:#111;padding:10px 14px;border-radius:8px;border:0;cursor:pointer;font-weight:600}
+    .btn.ghost{background:#2a2a2a;color:var(--text)}
 
-        @media (max-width: 768px) {
-            .content {
-                grid-template-columns: 1fr;
-            }
-        }
+    /* Right column */
+    .summary .card{background:#222;border-radius:8px;padding:14px;margin-bottom:14px}
+    .row{display:flex;justify-content:space-between;align-items:center}
+    .muted{color:#bfbfbf;font-size:13px}
+    .big-green{background:linear-gradient(180deg,#05c36a,#03a655);border-radius:8px;padding:22px;text-align:center;color:#042617;box-shadow:0 10px 30px rgba(6,195,106,.14);margin:12px 0}
+    .big-green h3{margin:0;font-size:20px}
+    .big-green .amount{font-size:40px;font-weight:800;margin-top:8px}
 
-        .input-section, .results-section {
-            background: var(--bg-primary);
-            padding: 25px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-        }
+    table{width:100%;border-collapse:collapse;margin-top:8px}
+    th,td{padding:10px;font-size:13px;text-align:left}
+    th{background:#0f0f0f;color:var(--accent);font-weight:700;border-bottom:1px solid rgba(255,255,255,.03)}
+    td{background:#141414;border-bottom:1px solid rgba(255,255,255,.02)}
 
-        h2 {
-            color: var(--accent-secondary);
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--accent-primary);
-        }
+    .small-muted{font-size:12px;color:#bdbdbd}
 
-        h3 {
-            color: var(--text-primary);
-            margin-bottom: 15px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
-        input[type="number"], input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            background: var(--bg-tertiary);
-            border: 2px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 16px;
-            transition: all 0.3s;
-            color: var(--text-primary);
-        }
-
-        input[type="number"]:focus, input[type="text"]:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2);
-        }
-
-        /* Remove arrows from number inputs */
-        input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        input[type="number"] {
-            -moz-appearance: textfield;
-        }
-
-        .kit-parts {
-            min-height: 200px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 15px;
-            background: var(--bg-tertiary);
-            margin-bottom: 20px;
-        }
-
-        .part-row {
-            display: grid;
-            grid-template-columns: 30px 1fr 1fr 80px;
-            gap: 10px;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .part-row:last-child {
-            border-bottom: none;
-        }
-
-        .part-checkbox {
-            accent-color: var(--accent-primary);
-            transform: scale(1.2);
-        }
-
-        .buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: var(--accent-primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #e55a2e;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-
-        .btn-secondary {
-            background: #424242;
-            color: var(--text-primary);
-        }
-
-        .btn-secondary:hover {
-            background: #4a4a4a;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #00b248;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-
-        .results-card {
-            background: var(--bg-tertiary);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            margin-bottom: 20px;
-            border: 1px solid var(--border-color);
-        }
-
-        .result-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .result-item:last-child {
-            border-bottom: none;
-        }
-
-        .result-label {
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
-        .result-value {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .total-refund {
-            background: var(--success);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            margin-top: 20px;
-            box-shadow: 0 4px 10px rgba(0, 200, 83, 0.3);
-        }
-
-        .total-refund .amount {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin: 10px 0;
-        }
-
-        .part-details {
-            margin-top: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 10px;
-            background: var(--bg-tertiary);
-        }
-
-        .detail-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 10px;
-            padding: 8px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 14px;
-        }
-
-        .detail-row.header {
-            font-weight: 700;
-            background: var(--bg-primary);
-            color: var(--accent-secondary);
-        }
-
-        .highlight {
-            background-color: rgba(255, 107, 53, 0.2);
-            padding: 2px 5px;
-            border-radius: 3px;
-            color: var(--accent-primary);
-            font-weight: 600;
-        }
-
-        .formula-explanation {
-            background: var(--bg-tertiary);
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 20px;
-            font-size: 14px;
-            border-left: 4px solid var(--accent-primary);
-        }
-
-        .formula {
-            font-family: monospace;
-            background: var(--bg-primary);
-            padding: 5px 10px;
-            border-radius: 4px;
-            margin: 5px 0;
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg-primary);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--accent-primary);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #e55a2e;
-        }
-    </style>
+    /* responsive */
+    @media (max-width:1100px){.wrap{grid-template-columns:1fr}.panel{padding:12px}}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="content">
-            <!-- Left Side: Input Section -->
-            <div class="input-section">
-                <h2>Kit Information</h2>
-                
-                <div class="form-group">
-                    <label for="kitPrice">Full Kit Price After Discount (Pk)</label>
-                    <input type="number" id="kitPrice" placeholder="Enter the discounted kit price" step="0.01" min="0" value="80">
-                </div>
+  <div class="wrap">
+    <div class="panel left">
+      <h2>Kit Information</h2>
+      <div class="kit-top">
+        <label class="small">Full Kit Price After Discount (Pk)</label>
+        <input id="kitPrice" class="input" type="number" min="0" step="0.01" value="" placeholder="0.00" />
+      </div>
 
-                <h3>Kit Parts</h3>
-                <div class="kit-parts" id="partsContainer">
-                    <!-- Parts will be generated here -->
-                </div>
+      <div class="parts-list" id="partsList">
+        <!-- part rows inserted by JS -->
+      </div>
 
-                <div class="buttons">
-                    <button type="button" id="addPart" class="btn-primary">Add More Parts</button>
-                    <button type="button" id="clearAll" class="btn-secondary">Clear All</button>
-                </div>
-
-                <div class="formula-explanation">
-                    <strong>Formula:</strong><br>
-                    <div class="formula">UnitPrice_i = (Pi × Pk) / SUM(Pj × Qj)</div>
-                    <div class="formula">ExtendedPrice_i = (Pi × Qi × Pk) / SUM(Pj × Qj)</div>
-                    Where:<br>
-                    • Pk = Total kit price after discount<br>
-                    • Pi = List price of part i (per unit)<br>
-                    • Qi = Quantity of part i<br>
-                    • SUM(Pj × Qj) = Sum of all parts' list price × quantity
-                </div>
-            </div>
-
-            <!-- Right Side: Results Section -->
-            <div class="results-section">
-                <h2>Calculation Results</h2>
-                
-                <div class="results-card">
-                    <div class="result-item">
-                        <span class="result-label">Total Kit List Price (SUM):</span>
-                        <span class="result-value" id="totalListPrice">$100.00</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">Actual Kit Price (Pk):</span>
-                        <span class="result-value" id="actualKitPrice">$80.00</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">Discount Applied:</span>
-                        <span class="result-value" id="discountAmount">$20.00 (20.0%)</span>
-                    </div>
-                </div>
-
-                <div class="results-card">
-                    <div class="result-item">
-                        <span class="result-label">Parts Checked:</span>
-                        <span class="result-value" id="partsChecked">3</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">Total Refund Value:</span>
-                        <span class="result-value" id="totalRefundValue">$80.00</span>
-                    </div>
-                </div>
-
-                <div class="total-refund">
-                    <div>Total Refund for Checked Parts</div>
-                    <div class="amount" id="totalRefund">$80.00</div>
-                    <div>Based on proportional allocation</div>
-                </div>
-
-                <div class="part-details">
-                    <h3>Individual Piece Prices</h3>
-                    <div class="detail-row header">
-                        <span>Part Number</span>
-                        <span>Unit Price</span>
-                        <span>Extended Price</span>
-                        <span>Allocated Price</span>
-                    </div>
-                    <div id="partDetails">
-                        <!-- Part details will be generated here -->
-                    </div>
-                </div>
-            </div>
-        </div>
+      <div style="display:flex;justify-content:space-between;margin-top:12px">
+        <button class="btn" id="addPart">Add More Parts</button>
+        <button class="btn ghost" id="clearAll">Clear All</button>
+      </div>
     </div>
 
-    <script>
-        // Initialize with example parts
-        let partCount = 3;
-        let exampleData = [
-            { partNumber: "Part A", price: 40, quantity: 1, checked: true },
-            { partNumber: "Part B", price: 30, quantity: 1, checked: true },
-            { partNumber: "Part C", price: 30, quantity: 1, checked: true }
-        ];
+    <div class="panel summary">
+      <h2>Calculation Results</h2>
+      <div class="card">
+        <div class="row"><div class="muted">Total Kit List Price (SUM):</div><div id="sumTotal">$0.00</div></div>
+        <div class="row" style="margin-top:8px"><div class="muted">Actual Kit Price (Pk):</div><div id="actualKit">$0.00</div></div>
+        <div class="row" style="margin-top:8px"><div class="muted">Discount Applied:</div><div id="discountApplied">$0.00 (0.0%)</div></div>
+      </div>
 
-        // Function to create a new part row
-        function createPartRow(id, partData = null) {
-            const row = document.createElement('div');
-            row.className = 'part-row';
-            row.innerHTML = `
-                <input type="checkbox" class="part-checkbox" ${partData && partData.checked ? 'checked' : ''}>
-                <input type="text" class="part-number" placeholder="Part Number" value="${partData ? partData.partNumber : ''}">
-                <input type="number" class="part-price" placeholder="0.00" step="0.01" min="0" value="${partData ? partData.price : '0'}">
-                <input type="number" class="part-quantity" placeholder="Qty" min="1" value="${partData ? partData.quantity : '1'}">
-            `;
-            return row;
-        }
+      <div class="card">
+        <div class="row"><div class="muted">Parts Checked:</div><div id="partsChecked">0</div></div>
+        <div class="row" style="margin-top:8px"><div class="muted">Total Refund Value:</div><div id="totalRefund">$0.00</div></div>
+      </div>
 
-        // Function to initialize the parts container
-        function initializeParts() {
-            const container = document.getElementById('partsContainer');
-            container.innerHTML = '';
-            
-            for (let i = 0; i < partCount; i++) {
-                const partData = i < exampleData.length ? exampleData[i] : null;
-                container.appendChild(createPartRow(i, partData));
-            }
-            
-            // Add event listeners to all inputs
-            addEventListeners();
-            calculatePrices();
-        }
+      <div class="big-green">
+        <h3>Total Refund for Checked Parts</h3>
+        <div class="amount" id="bigRefund">$0.00</div>
+        <div class="small-muted">Based on proportional allocation</div>
+      </div>
 
-        // Function to add event listeners to all inputs
-        function addEventListeners() {
-            // Kit price input
-            document.getElementById('kitPrice').addEventListener('input', calculatePrices);
-            
-            // Part inputs
-            const inputs = document.querySelectorAll('.part-number, .part-price, .part-quantity, .part-checkbox');
-            inputs.forEach(input => {
-                input.addEventListener('input', calculatePrices);
-                input.addEventListener('change', calculatePrices);
-            });
-        }
+      <div class="card">
+        <h3 style="margin-top:0;color:var(--accent)">Individual Piece Prices</h3>
+        <table id="priceTable">
+          <thead>
+            <tr><th>Part Number</th><th>Unit Price</th><th>Extended Price</th><th>Allocated Unit</th><th>Allocated Ext.</th></tr>
+          </thead>
+          <tbody>
+            <!-- rows inserted by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-        // Main calculation function using the correct formula
-        function calculatePrices() {
-            const Pk = parseFloat(document.getElementById('kitPrice').value) || 0;
-            
-            // Get all part rows
-            const partRows = document.querySelectorAll('.part-row');
-            let sumPjQj = 0;
-            let checkedParts = 0;
-            let totalRefund = 0;
-            
-            // First pass: calculate SUM(Pj × Qj)
-            partRows.forEach(row => {
-                const checkbox = row.querySelector('.part-checkbox');
-                const priceInput = row.querySelector('.part-price');
-                const quantityInput = row.querySelector('.part-quantity');
-                
-                const Pi = parseFloat(priceInput.value) || 0;
-                const Qi = parseInt(quantityInput.value) || 1;
-                const isChecked = checkbox.checked;
-                
-                if (isChecked) {
-                    sumPjQj += Pi * Qi;
-                    checkedParts++;
-                }
-            });
-            
-            // Update basic information
-            document.getElementById('totalListPrice').textContent = `$${sumPjQj.toFixed(2)}`;
-            document.getElementById('actualKitPrice').textContent = `$${Pk.toFixed(2)}`;
-            
-            const discountAmount = sumPjQj - Pk;
-            const discountPercent = sumPjQj > 0 ? (discountAmount / sumPjQj * 100) : 0;
-            document.getElementById('discountAmount').textContent = 
-                `$${discountAmount.toFixed(2)} (${discountPercent.toFixed(1)}%)`;
-            
-            document.getElementById('partsChecked').textContent = checkedParts;
-            
-            // Second pass: calculate individual prices and total refund
-            const partDetails = document.getElementById('partDetails');
-            partDetails.innerHTML = '';
-            
-            partRows.forEach(row => {
-                const checkbox = row.querySelector('.part-checkbox');
-                const partNumberInput = row.querySelector('.part-number');
-                const priceInput = row.querySelector('.part-price');
-                const quantityInput = row.querySelector('.part-quantity');
-                
-                const partNumber = partNumberInput.value || 'Unnamed Part';
-                const Pi = parseFloat(priceInput.value) || 0;
-                const Qi = parseInt(quantityInput.value) || 1;
-                const isChecked = checkbox.checked;
-                
-                let unitPrice_i = 0;
-                let extendedPrice_i = 0;
-                
-                if (isChecked && sumPjQj > 0) {
-                    // UnitPrice_i = (Pi * Pk) / SUM(Pj * Qj)
-                    unitPrice_i = (Pi * Pk) / sumPjQj;
-                    
-                    // ExtendedPrice_i = (Pi * Qi * Pk) / SUM(Pj * Qj)
-                    extendedPrice_i = (Pi * Qi * Pk) / sumPjQj;
-                    
-                    totalRefund += extendedPrice_i;
-                }
-                
-                const extendedListPrice = Pi * Qi;
-                
-                // Add to part details
-                if (partNumber !== 'Unnamed Part' || Pi > 0) {
-                    const detailRow = document.createElement('div');
-                    detailRow.className = 'detail-row';
-                    detailRow.innerHTML = `
-                        <span>${partNumber}</span>
-                        <span>$${Pi.toFixed(2)}</span>
-                        <span>$${extendedListPrice.toFixed(2)}</span>
-                        <span class="${isChecked ? 'highlight' : ''}">$${extendedPrice_i.toFixed(2)}</span>
-                    `;
-                    partDetails.appendChild(detailRow);
-                }
-            });
-            
-            // Update refund values
-            document.getElementById('totalRefundValue').textContent = `$${totalRefund.toFixed(2)}`;
-            document.getElementById('totalRefund').textContent = `$${totalRefund.toFixed(2)}`;
-        }
+  <script>
+    // Start with 8 rows
+    const INITIAL_ROWS = 8;
+    const MAX_ROWS = 200;
 
-        // Add more parts functionality
-        document.getElementById('addPart').addEventListener('click', function() {
-            if (partCount < 20) { // Limit to 20 parts for performance
-                partCount++;
-                const container = document.getElementById('partsContainer');
-                container.appendChild(createPartRow(partCount));
-                addEventListeners();
-                calculatePrices();
-            } else {
-                alert('Maximum of 20 parts allowed for optimal performance.');
-            }
-        });
+    const partsList = document.getElementById('partsList');
+    const addBtn = document.getElementById('addPart');
+    const clearBtn = document.getElementById('clearAll');
+    const kitPriceInput = document.getElementById('kitPrice');
 
-        // Clear all functionality
-        document.getElementById('clearAll').addEventListener('click', function() {
-            if (confirm('Are you sure you want to clear all data?')) {
-                document.getElementById('kitPrice').value = '0';
-                partCount = 3;
-                exampleData = [
-                    { partNumber: "", price: 0, quantity: 1, checked: false },
-                    { partNumber: "", price: 0, quantity: 1, checked: false },
-                    { partNumber: "", price: 0, quantity: 1, checked: false }
-                ];
-                initializeParts();
-            }
-        });
+    const sumTotalEl = document.getElementById('sumTotal');
+    const actualKitEl = document.getElementById('actualKit');
+    const discountAppliedEl = document.getElementById('discountApplied');
+    const partsCheckedEl = document.getElementById('partsChecked');
+    const totalRefundEl = document.getElementById('totalRefund');
+    const bigRefundEl = document.getElementById('bigRefund');
+    const priceTableBody = document.querySelector('#priceTable tbody');
 
-        // Initialize the page
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeParts();
-        });
-    </script>
+    function money(v){
+      return (typeof v==='number' ? v : Number(v||0)).toLocaleString('en-US',{style:'currency',currency:'USD'});
+    }
+
+    function createRow(id, partNumber='', price=0, qty=1){
+      const row = document.createElement('div');
+      row.className = 'part-row';
+      row.dataset.id = id;
+      row.innerHTML = `
+        <div class="checkbox-wrap"><input type="checkbox" class="chk" /></div>
+        <div><input class="qty" type="number" min="1" step="1" value="${Number(qty)||1}" /></div>
+        <div><input class="partnum" type="text" placeholder="Part Number" value="${escapeHtml(partNumber)}" /></div>
+        <div><input class="unit" type="number" min="0" step="0.01" placeholder="0.00" value="${price ? Number(price).toFixed(2) : ''}" /></div>
+      `;
+
+      partsList.appendChild(row);
+
+      // attach listeners
+      const unitInput = row.querySelector('.unit');
+      const qtyInput = row.querySelector('.qty');
+      const partInput = row.querySelector('.partnum');
+      const chkInput = row.querySelector('.chk');
+
+      ['input','change'].forEach(evt=>{
+        unitInput.addEventListener(evt, computeAll);
+        qtyInput.addEventListener(evt, computeAll);
+        partInput.addEventListener(evt, computeAll);
+        chkInput.addEventListener(evt, computeAll);
+      });
+
+      // select all on focus so user can just type to replace
+      unitInput.addEventListener('focus', (e)=>{ try{ e.target.select(); }catch(e){} });
+      qtyInput.addEventListener('focus', (e)=>{ try{ e.target.select(); }catch(e){} });
+
+      return row;
+    }
+
+    function escapeHtml(s){
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    function rebuildTable(items, f){
+      priceTableBody.innerHTML = '';
+      items.forEach(it=>{
+        const tr = document.createElement('tr');
+        const allocatedUnit = (it.unit * f) || 0;
+        const allocatedExt = allocatedUnit * it.qty;
+        tr.innerHTML = `<td>${escapeHtml(it.part || '')}</td>
+                        <td>${money(it.unit)}</td>
+                        <td>${money(it.unit * it.qty)}</td>
+                        <td>${money(allocatedUnit)}</td>
+                        <td>${money(allocatedExt)}</td>`;
+        priceTableBody.appendChild(tr);
+      });
+    }
+
+    function computeAll(){
+      // gather data
+      const rows = Array.from(document.querySelectorAll('.part-row'));
+      const items = rows.map(r=>{
+        const part = r.querySelector('.partnum').value.trim();
+        const unit = parseFloat(r.querySelector('.unit').value) || 0;
+        const qty = parseInt(r.querySelector('.qty').value) || 0;
+        const checked = r.querySelector('.chk').checked;
+        return {part,unit,qty,checked};
+      });
+
+      const S = items.reduce((acc,it)=>acc + (it.unit * it.qty),0);
+      const Pk = parseFloat(kitPriceInput.value) || 0;
+      const f = (S > 0) ? (Pk / S) : 0; // proportional multiplier
+
+      // totals
+      const discountedKitTotal = Pk;
+      const discountAmount = S - discountedKitTotal;
+      const discountPercent = S>0 ? (discountAmount / S) : 0;
+
+      sumTotalEl.textContent = money(S);
+      actualKitEl.textContent = money(Pk);
+      discountAppliedEl.textContent = `${money(discountAmount)} (${(discountPercent*100).toFixed(1)}%)`;
+
+      // individual allocations
+      rebuildTable(items, f);
+
+      // refund calc for checked items
+      const checkedItems = items.filter(i=>i.checked);
+      const partsCheckedCount = checkedItems.length;
+      const totalRefund = checkedItems.reduce((acc,it)=> acc + ((it.unit * f) * it.qty), 0);
+
+      partsCheckedEl.textContent = partsCheckedCount;
+      totalRefundEl.textContent = money(totalRefund);
+      bigRefundEl.textContent = money(totalRefund);
+    }
+
+    // initialize rows
+    for(let i=0;i<INITIAL_ROWS;i++) createRow(i+1);
+    computeAll();
+
+    addBtn.addEventListener('click', ()=>{
+      const current = document.querySelectorAll('.part-row').length;
+      if(current >= MAX_ROWS) return;
+      createRow(current+1);
+      computeAll();
+
+      // show a small flash effect on the newly added row (optional)
+    });
+
+    clearBtn.addEventListener('click', ()=>{
+      kitPriceInput.value = '0.00';
+      partsList.innerHTML='';
+      for(let i=0;i<INITIAL_ROWS;i++) createRow(i+1);
+      computeAll();
+    });
+
+    kitPriceInput.addEventListener('input', computeAll);
+    kitPriceInput.addEventListener('focus', (e)=>{ try{ e.target.select(); }catch(e){} });
+
+    // convenience: click on any table row toggles the corresponding checkbox if part number matches
+    priceTableBody.addEventListener('click', (e)=>{
+      // noop
+    });
+
+    // keep realtime
+    partsList.addEventListener('input', computeAll);
+    partsList.addEventListener('change', computeAll);
+
+    // small accessibility: pressing Enter on Add More creates row
+    addBtn.addEventListener('keyup', (e)=>{ if(e.key==='Enter') addBtn.click();});
+  </script>
 </body>
 </html>
