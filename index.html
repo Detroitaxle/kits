@@ -252,7 +252,7 @@
 
         .detail-row {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
             gap: 10px;
             padding: 8px;
             border-bottom: 1px solid var(--border-color);
@@ -271,6 +271,23 @@
             border-radius: 3px;
             color: var(--accent-primary);
             font-weight: 600;
+        }
+
+        .formula-explanation {
+            background: var(--bg-tertiary);
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            font-size: 14px;
+            border-left: 4px solid var(--accent-primary);
+        }
+
+        .formula {
+            font-family: monospace;
+            background: var(--bg-primary);
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin: 5px 0;
         }
 
         /* Custom scrollbar */
@@ -301,8 +318,8 @@
                 <h2>Kit Information</h2>
                 
                 <div class="form-group">
-                    <label for="kitPrice">Full Kit Price ($)</label>
-                    <input type="number" id="kitPrice" placeholder="Enter the discounted kit price" step="0.01" min="0" value="0">
+                    <label for="kitPrice">Full Kit Price After Discount (Pk)</label>
+                    <input type="number" id="kitPrice" placeholder="Enter the discounted kit price" step="0.01" min="0" value="80">
                 </div>
 
                 <h3>Kit Parts</h3>
@@ -314,6 +331,17 @@
                     <button type="button" id="addPart" class="btn-primary">Add More Parts</button>
                     <button type="button" id="clearAll" class="btn-secondary">Clear All</button>
                 </div>
+
+                <div class="formula-explanation">
+                    <strong>Formula:</strong><br>
+                    <div class="formula">UnitPrice_i = (Pi × Pk) / SUM(Pj × Qj)</div>
+                    <div class="formula">ExtendedPrice_i = (Pi × Qi × Pk) / SUM(Pj × Qj)</div>
+                    Where:<br>
+                    • Pk = Total kit price after discount<br>
+                    • Pi = List price of part i (per unit)<br>
+                    • Qi = Quantity of part i<br>
+                    • SUM(Pj × Qj) = Sum of all parts' list price × quantity
+                </div>
             </div>
 
             <!-- Right Side: Results Section -->
@@ -322,33 +350,33 @@
                 
                 <div class="results-card">
                     <div class="result-item">
-                        <span class="result-label">Total Kit List Price:</span>
-                        <span class="result-value" id="totalListPrice">$0.00</span>
+                        <span class="result-label">Total Kit List Price (SUM):</span>
+                        <span class="result-value" id="totalListPrice">$100.00</span>
                     </div>
                     <div class="result-item">
-                        <span class="result-label">Actual Kit Price:</span>
-                        <span class="result-value" id="actualKitPrice">$0.00</span>
+                        <span class="result-label">Actual Kit Price (Pk):</span>
+                        <span class="result-value" id="actualKitPrice">$80.00</span>
                     </div>
                     <div class="result-item">
                         <span class="result-label">Discount Applied:</span>
-                        <span class="result-value" id="discountAmount">$0.00 (0%)</span>
+                        <span class="result-value" id="discountAmount">$20.00 (20.0%)</span>
                     </div>
                 </div>
 
                 <div class="results-card">
                     <div class="result-item">
                         <span class="result-label">Parts Checked:</span>
-                        <span class="result-value" id="partsChecked">0</span>
+                        <span class="result-value" id="partsChecked">3</span>
                     </div>
                     <div class="result-item">
                         <span class="result-label">Total Refund Value:</span>
-                        <span class="result-value" id="totalRefundValue">$0.00</span>
+                        <span class="result-value" id="totalRefundValue">$80.00</span>
                     </div>
                 </div>
 
                 <div class="total-refund">
                     <div>Total Refund for Checked Parts</div>
-                    <div class="amount" id="totalRefund">$0.00</div>
+                    <div class="amount" id="totalRefund">$80.00</div>
                     <div>Based on proportional allocation</div>
                 </div>
 
@@ -356,8 +384,9 @@
                     <h3>Individual Piece Prices</h3>
                     <div class="detail-row header">
                         <span>Part Number</span>
-                        <span>List Price</span>
-                        <span>Calculated Price</span>
+                        <span>Unit Price</span>
+                        <span>Extended Price</span>
+                        <span>Allocated Price</span>
                     </div>
                     <div id="partDetails">
                         <!-- Part details will be generated here -->
@@ -368,18 +397,23 @@
     </div>
 
     <script>
-        // Initialize with 8 empty part rows
-        let partCount = 8;
+        // Initialize with example parts
+        let partCount = 3;
+        let exampleData = [
+            { partNumber: "Part A", price: 40, quantity: 1, checked: true },
+            { partNumber: "Part B", price: 30, quantity: 1, checked: true },
+            { partNumber: "Part C", price: 30, quantity: 1, checked: true }
+        ];
 
         // Function to create a new part row
-        function createPartRow(id) {
+        function createPartRow(id, partData = null) {
             const row = document.createElement('div');
             row.className = 'part-row';
             row.innerHTML = `
-                <input type="checkbox" class="part-checkbox">
-                <input type="text" class="part-number" placeholder="Part Number">
-                <input type="number" class="part-price" placeholder="0.00" step="0.01" min="0" value="0">
-                <input type="number" class="part-quantity" placeholder="Qty" min="1" value="1">
+                <input type="checkbox" class="part-checkbox" ${partData && partData.checked ? 'checked' : ''}>
+                <input type="text" class="part-number" placeholder="Part Number" value="${partData ? partData.partNumber : ''}">
+                <input type="number" class="part-price" placeholder="0.00" step="0.01" min="0" value="${partData ? partData.price : '0'}">
+                <input type="number" class="part-quantity" placeholder="Qty" min="1" value="${partData ? partData.quantity : '1'}">
             `;
             return row;
         }
@@ -390,7 +424,8 @@
             container.innerHTML = '';
             
             for (let i = 0; i < partCount; i++) {
-                container.appendChild(createPartRow(i));
+                const partData = i < exampleData.length ? exampleData[i] : null;
+                container.appendChild(createPartRow(i, partData));
             }
             
             // Add event listeners to all inputs
@@ -411,38 +446,38 @@
             });
         }
 
-        // Main calculation function
+        // Main calculation function using the correct formula
         function calculatePrices() {
-            const kitPrice = parseFloat(document.getElementById('kitPrice').value) || 0;
+            const Pk = parseFloat(document.getElementById('kitPrice').value) || 0;
             
             // Get all part rows
             const partRows = document.querySelectorAll('.part-row');
-            let totalListPrice = 0;
+            let sumPjQj = 0;
             let checkedParts = 0;
             let totalRefund = 0;
             
-            // First pass: calculate total list price
+            // First pass: calculate SUM(Pj × Qj)
             partRows.forEach(row => {
                 const checkbox = row.querySelector('.part-checkbox');
                 const priceInput = row.querySelector('.part-price');
                 const quantityInput = row.querySelector('.part-quantity');
                 
-                const price = parseFloat(priceInput.value) || 0;
-                const quantity = parseInt(quantityInput.value) || 1;
+                const Pi = parseFloat(priceInput.value) || 0;
+                const Qi = parseInt(quantityInput.value) || 1;
                 const isChecked = checkbox.checked;
                 
                 if (isChecked) {
-                    totalListPrice += price * quantity;
+                    sumPjQj += Pi * Qi;
                     checkedParts++;
                 }
             });
             
             // Update basic information
-            document.getElementById('totalListPrice').textContent = `$${totalListPrice.toFixed(2)}`;
-            document.getElementById('actualKitPrice').textContent = `$${kitPrice.toFixed(2)}`;
+            document.getElementById('totalListPrice').textContent = `$${sumPjQj.toFixed(2)}`;
+            document.getElementById('actualKitPrice').textContent = `$${Pk.toFixed(2)}`;
             
-            const discountAmount = totalListPrice - kitPrice;
-            const discountPercent = totalListPrice > 0 ? (discountAmount / totalListPrice * 100) : 0;
+            const discountAmount = sumPjQj - Pk;
+            const discountPercent = sumPjQj > 0 ? (discountAmount / sumPjQj * 100) : 0;
             document.getElementById('discountAmount').textContent = 
                 `$${discountAmount.toFixed(2)} (${discountPercent.toFixed(1)}%)`;
             
@@ -459,26 +494,34 @@
                 const quantityInput = row.querySelector('.part-quantity');
                 
                 const partNumber = partNumberInput.value || 'Unnamed Part';
-                const price = parseFloat(priceInput.value) || 0;
-                const quantity = parseInt(quantityInput.value) || 1;
+                const Pi = parseFloat(priceInput.value) || 0;
+                const Qi = parseInt(quantityInput.value) || 1;
                 const isChecked = checkbox.checked;
                 
-                const partTotalPrice = price * quantity;
-                let calculatedPrice = 0;
+                let unitPrice_i = 0;
+                let extendedPrice_i = 0;
                 
-                if (isChecked && totalListPrice > 0) {
-                    calculatedPrice = (partTotalPrice / totalListPrice) * kitPrice;
-                    totalRefund += calculatedPrice;
+                if (isChecked && sumPjQj > 0) {
+                    // UnitPrice_i = (Pi * Pk) / SUM(Pj * Qj)
+                    unitPrice_i = (Pi * Pk) / sumPjQj;
+                    
+                    // ExtendedPrice_i = (Pi * Qi * Pk) / SUM(Pj * Qj)
+                    extendedPrice_i = (Pi * Qi * Pk) / sumPjQj;
+                    
+                    totalRefund += extendedPrice_i;
                 }
                 
+                const extendedListPrice = Pi * Qi;
+                
                 // Add to part details
-                if (partNumber !== 'Unnamed Part' || price > 0) {
+                if (partNumber !== 'Unnamed Part' || Pi > 0) {
                     const detailRow = document.createElement('div');
                     detailRow.className = 'detail-row';
                     detailRow.innerHTML = `
                         <span>${partNumber}</span>
-                        <span>$${partTotalPrice.toFixed(2)}</span>
-                        <span class="${isChecked ? 'highlight' : ''}">$${calculatedPrice.toFixed(2)}</span>
+                        <span>$${Pi.toFixed(2)}</span>
+                        <span>$${extendedListPrice.toFixed(2)}</span>
+                        <span class="${isChecked ? 'highlight' : ''}">$${extendedPrice_i.toFixed(2)}</span>
                     `;
                     partDetails.appendChild(detailRow);
                 }
@@ -506,7 +549,12 @@
         document.getElementById('clearAll').addEventListener('click', function() {
             if (confirm('Are you sure you want to clear all data?')) {
                 document.getElementById('kitPrice').value = '0';
-                partCount = 8;
+                partCount = 3;
+                exampleData = [
+                    { partNumber: "", price: 0, quantity: 1, checked: false },
+                    { partNumber: "", price: 0, quantity: 1, checked: false },
+                    { partNumber: "", price: 0, quantity: 1, checked: false }
+                ];
                 initializeParts();
             }
         });
